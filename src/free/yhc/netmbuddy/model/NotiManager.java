@@ -281,10 +281,10 @@ public class NotiManager {
         eAssert(Utils.isUiThread());
         // Set event time.
         Notification n;
-        if (Utils.isIcsOrLater())
-            n = buildNotificationICS(type, videoTitle);
-        else
+        if (Utils.isAndroidApiLowerICS())
             n = buildNotification(type, videoTitle);
+        else
+            n = buildNotificationICS(type, videoTitle);
 
         n.when = System.currentTimeMillis();
         mNm.notify(type.getId(), n);
@@ -296,6 +296,8 @@ public class NotiManager {
         case ALERT:
             // In case of player notification
             mLastPlayerNotification = n;
+        default:
+            // ignore for other notifications.
         }
     }
 

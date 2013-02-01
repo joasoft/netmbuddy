@@ -27,6 +27,7 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -43,11 +44,13 @@ import android.net.Uri;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 import free.yhc.netmbuddy.DiagAsyncTask;
 import free.yhc.netmbuddy.Err;
@@ -83,13 +86,17 @@ public class UiUtils {
         void onCancel(Dialog dialog);
     }
 
-    public interface OnPlaylistSelectedListener {
+    public interface OnMenuSelected {
+        void onSelected(int itemId);
+    }
+
+    public interface OnPlaylistSelected {
         void onUserMenu(int pos, Object user);
         void onPlaylist(long plid, Object user);
     }
 
     public interface OnPostExecuteListener {
-        void    onPostExecute(Err result, Object user);
+        void onPostExecute(Err result, Object user);
     }
 
     // ========================================================================
@@ -301,7 +308,7 @@ public class UiUtils {
                               final Context                     context,
                               final int                         diagTitle,
                               final String[]                    userMenuStrings,
-                              final OnPlaylistSelectedListener  action,
+                              final OnPlaylistSelected          action,
                               long                              plidExcluded,
                               final Object                      user) {
         final String[] userMenus = (null == userMenuStrings)? new String[0]: userMenuStrings;
@@ -387,6 +394,62 @@ public class UiUtils {
             }
         });
         return bldr.create();
+    }
+
+    /**
+     *
+     * @param activity
+     * @param action
+     * @param anchor
+     *   Used for targets whose API level is 11(HC) or higher.
+     * @param menuRes
+     *   Used for targets whose API level is 11(HC) or higher.
+     *   This menu should match menuItemIds and menuTitleIds.
+     * @param diagTitle
+     *   Popup menu dialog title.
+     * @param menuItemIds
+     *   Used for targets whose API level is smaller than 11(HC).
+     *   This value should match menuTitleIds and menuRes
+     * @param menuTitleIds
+     *   Used for targets whose API level is smaller than 11(HC)
+     *   This value should match menuItemIds and menuRes
+     */
+    @TargetApi(11)
+    public static void
+    startPopupMenu(final Activity        activity,
+                   final OnMenuSelected  action,
+                   final View            anchor,
+                   final int             menuRes,
+                   final int[]           menuItemIds,
+                   final int[]           menuTitleIds) {
+        eAssert(null != action
+                && menuItemIds.length == menuTitleIds.length);
+        if (Utils.isAndroidApiLowerHC()) {
+            final CharSequence[] items = new CharSequence[menuTitleIds.length];
+            for (int i = 0; i < menuTitleIds.length; i++)
+                items[i] = activity.getResources().getText(menuTitleIds[i]);
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+            builder.setItems(items, new DialogInterface.OnClickListener() {
+                @Override
+                public void
+                onClick(DialogInterface dialog, int item) {
+                    action.onSelected(menuItemIds[item]);
+                }
+            });
+        } else {
+            PopupMenu popup = new PopupMenu(activity, anchor);
+            popup.getMenuInflater().inflate(menuRes, popup.getMenu());
+            popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                @Override
+                public boolean
+                onMenuItemClick(MenuItem item) {
+                    action.onSelected(item.getItemId());
+                    return true;
+                }
+            });
+        }
+
     }
 
     /**
@@ -604,7 +667,7 @@ public class UiUtils {
                 final long[]                  vids,
                 final boolean                 move) {
         final long srcPlid = UiUtils.isUserPlaylist(plid)? plid: DB.INVALID_PLAYLIST_ID;
-        UiUtils.OnPlaylistSelectedListener action = new UiUtils.OnPlaylistSelectedListener() {
+        UiUtils.OnPlaylistSelected action = new UiUtils.OnPlaylistSelected() {
             @Override
             public void
             onPlaylist(long plid, Object user) {

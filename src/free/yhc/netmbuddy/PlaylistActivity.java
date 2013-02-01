@@ -430,31 +430,20 @@ public class PlaylistActivity extends Activity {
 
     private void
     onMenuMoreDB(final View anchor) {
-        final int[] optStringIds = {
-                R.string.export,
-                R.string.import_,
-                R.string.merge };
-
-        final CharSequence[] items = new CharSequence[optStringIds.length];
-        for (int i = 0; i < optStringIds.length; i++)
-            items[i] = getResources().getText(optStringIds[i]);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.database);
-        builder.setItems(items, new DialogInterface.OnClickListener() {
+        UiUtils.OnMenuSelected action = new UiUtils.OnMenuSelected() {
             @Override
             public void
-            onClick(DialogInterface dialog, int item) {
-                switch (optStringIds[item]) {
-                case R.string.export:
+            onSelected(int itemId) {
+                switch (itemId) {
+                case R.id.export:
                     onMenuMoreDbExport(anchor);
                     break;
 
-                case R.string.import_:
+                case R.id.import_:
                     onMenuMoreDbImport(anchor);
                     break;
 
-                case R.string.merge:
+                case R.id.merge:
                     onMenuMoreDbMerge(anchor);
                     break;
 
@@ -462,8 +451,22 @@ public class PlaylistActivity extends Activity {
                     eAssert(false);
                 }
             }
-        });
-        builder.create().show();
+        };
+
+        UiUtils.startPopupMenu(this,
+                               action,
+                               anchor,
+                               R.menu.popup_more_db,
+                               new int[] {
+                                   R.id.export,
+                                   R.id.import_,
+                                   R.id.merge
+                               },
+                               new int[] {
+                                   R.string.export,
+                                   R.string.import_,
+                                   R.string.merge
+                               });
     }
 
     private void
@@ -479,34 +482,37 @@ public class PlaylistActivity extends Activity {
 
     private void
     onMenuMoreYtSearch(final View anchor) {
-        final int[] optStringIds = {
-                R.string.videos_with_author,
-                R.string.user_playlist };
-
-        final CharSequence[] items = new CharSequence[optStringIds.length];
-        for (int i = 0; i < optStringIds.length; i++)
-            items[i] = getResources().getText(optStringIds[i]);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.ytsearch);
-        builder.setItems(items, new DialogInterface.OnClickListener() {
+        UiUtils.OnMenuSelected action = new UiUtils.OnMenuSelected() {
             @Override
             public void
-            onClick(DialogInterface dialog, int item) {
-                switch (optStringIds[item]) {
-                case R.string.videos_with_author:
+            onSelected(int itemId) {
+                switch (itemId) {
+                case R.id.videos_with_author:
                     onMenuMoreYtSearchAuthor(anchor);
                     break;
 
-                case R.string.user_playlist:
+                case R.id.user_playlist:
                     onMenuMoreYtSearchPlaylist(anchor);
                     break;
+
                 default:
                     eAssert(false);
                 }
             }
-        });
-        builder.create().show();
+        };
+
+        UiUtils.startPopupMenu(this,
+                               action,
+                               anchor,
+                               R.menu.popup_more_ytsearch,
+                               new int[] {
+                                   R.id.videos_with_author,
+                                   R.id.user_playlist
+                               },
+                               new int[] {
+                                   R.string.videos_of_this_author,
+                                   R.string.user_playlist
+                               });
     }
 
     private void
@@ -526,57 +532,12 @@ public class PlaylistActivity extends Activity {
 
     private void
     onMenuMoreAutoStop(View anchor) {
-        final int[] optStringIds = {
-                R.string.off,
-                R.string.time10m,
-                R.string.time20m,
-                R.string.time30m,
-                R.string.time1h,
-                R.string.time2h };
-
-
-        final CharSequence[] items = new CharSequence[optStringIds.length];
-        for (int i = 0; i < optStringIds.length; i++)
-            items[i] = getResources().getText(optStringIds[i]);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.autostop);
-        builder.setItems(items, new DialogInterface.OnClickListener() {
+        UiUtils.OnMenuSelected action = new UiUtils.OnMenuSelected() {
             @Override
             public void
-            onClick(DialogInterface dialog, int item) {
+            onSelected(int itemId) {
                 long timems = 0;
-                switch (optStringIds[item]) {
-                case R.string.off:      timems = 0;                     break;
-                case R.string.time10m:  timems = 10 * 60 * 1000;        break;
-                case R.string.time20m:  timems = 20 * 60 * 1000;        break;
-                case R.string.time30m:  timems = 30 * 60 * 1000;        break;
-                case R.string.time1h:   timems = 1 * 60 * 60 * 1000;    break;
-                case R.string.time2h:   timems = 2 * 60 * 60 * 1000;    break;
-                default:
-                    eAssert(false);
-                }
-
-                if (0 <= timems)
-                    mMp.setAutoStop(timems);
-                else
-                    mMp.unsetAutoStop();
-            }
-        });
-        builder.create().show();
-    }
-
-    @TargetApi(15)
-    private void
-    onMenuMoreAutoStopICS(View anchor) {
-        PopupMenu popup = new PopupMenu(this, anchor);
-        popup.getMenuInflater().inflate(R.menu.popup_more_autostop, popup.getMenu());
-        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean
-            onMenuItemClick(MenuItem item) {
-                long timems = 0;
-                switch (item.getItemId()) {
+                switch (itemId) {
                 case R.id.off:      timems = 0;                     break;
                 case R.id.time10m:  timems = 10 * 60 * 1000;        break;
                 case R.id.time20m:  timems = 20 * 60 * 1000;        break;
@@ -591,83 +552,38 @@ public class PlaylistActivity extends Activity {
                     mMp.setAutoStop(timems);
                 else
                     mMp.unsetAutoStop();
-
-                return true;
             }
-        });
-        popup.show();
+        };
+
+        UiUtils.startPopupMenu(this,
+                               action,
+                               anchor,
+                               R.menu.popup_more_autostop,
+                               new int[] {
+                                   R.id.off,
+                                   R.id.time10m,
+                                   R.id.time20m,
+                                   R.id.time30m,
+                                   R.id.time1h,
+                                   R.id.time2h
+                               },
+                               new int[] {
+                                   R.string.off,
+                                   R.string.time10m,
+                                   R.string.time20m,
+                                   R.string.time30m,
+                                   R.string.time1h,
+                                   R.string.time2h
+                               });
     }
 
     private void
     onMenuMore(final View anchor) {
-        final int[] optStringIds = {
-                R.string.app_info,
-                R.string.license,
-                R.string.clear_search_history,
-                R.string.dbmore,
-                R.string.ytsearchmore,
-                R.string.feedback,
-                R.string.autostop };
-
-        final CharSequence[] items = new CharSequence[optStringIds.length];
-        for (int i = 0; i < optStringIds.length; i++)
-            items[i] = getResources().getText(optStringIds[i]);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setItems(items, new DialogInterface.OnClickListener() {
+        UiUtils.OnMenuSelected action = new UiUtils.OnMenuSelected() {
             @Override
             public void
-            onClick(DialogInterface dialog, int item) {
-                switch (optStringIds[item]) {
-                case R.string.autostop:
-                    if (mMp.hasActiveVideo())
-                        onMenuMoreAutoStop(anchor);
-                    else
-                        UiUtils.showTextToast(PlaylistActivity.this, R.string.msg_autostop_not_allowed);
-                    break;
-
-                case R.string.feedback:
-                    onMenuMoreSendOpinion(anchor);
-                    break;
-
-                case R.string.dbmore:
-                    onMenuMoreDB(anchor);
-                    break;
-
-                case R.string.ytsearchmore:
-                    onMenuMoreYtSearch(anchor);
-                    break;
-
-                case R.string.clear_search_history:
-                    onMenuMoreClearSearchHistory(anchor);
-                    break;
-
-                case R.string.app_info:
-                    onMenuMoreAppInfo(anchor);
-                    break;
-
-                case R.string.license:
-                    onMenuMoreLicense(anchor);
-                    break;
-
-                default:
-                    eAssert(false);
-                }
-            }
-        });
-        builder.create().show();
-    }
-
-    @TargetApi(15)
-    private void
-    onMenuMoreICS(final View anchor) {
-        PopupMenu popup = new PopupMenu(this, anchor);
-        popup.getMenuInflater().inflate(R.menu.popup_more, popup.getMenu());
-        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean
-            onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()) {
+            onSelected(int itemId) {
+                switch (itemId) {
                 case R.id.app_info:
                     onMenuMoreAppInfo(anchor);
                     break;
@@ -694,7 +610,7 @@ public class PlaylistActivity extends Activity {
 
                 case R.id.autostop:
                     if (mMp.hasActiveVideo())
-                        onMenuMoreAutoStopICS(anchor);
+                        onMenuMoreAutoStop(anchor);
                     else
                         UiUtils.showTextToast(PlaylistActivity.this, R.string.msg_autostop_not_allowed);
                     break;
@@ -702,10 +618,31 @@ public class PlaylistActivity extends Activity {
                 default:
                     eAssert(false);
                 }
-                return true;
             }
-        });
-        popup.show();
+        };
+
+        UiUtils.startPopupMenu(this,
+                               action,
+                               anchor,
+                               R.menu.popup_more,
+                               new int[] {
+                                   R.id.app_info,
+                                   R.id.license,
+                                   R.id.clear_search_history,
+                                   R.id.dbmore,
+                                   R.id.ytsearchmore,
+                                   R.id.feedback,
+                                   R.id.autostop
+                               },
+                               new int[] {
+                                   R.string.app_info,
+                                   R.string.license,
+                                   R.string.clear_search_history,
+                                   R.string.dbmore,
+                                   R.string.ytsearchmore,
+                                   R.string.feedback,
+                                   R.string.autostop
+                               });
     }
 
     private void
@@ -757,10 +694,7 @@ public class PlaylistActivity extends Activity {
             @Override
             public void
             onClick(final View v) {
-                if (Utils.isIcsOrLater())
-                    onMenuMoreICS(v);
-                else
-                    onMenuMore(v);
+                onMenuMore(v);
             }
         });
     }
@@ -833,7 +767,7 @@ public class PlaylistActivity extends Activity {
 
     private void
     onContextMenuCopyTo(final AdapterContextMenuInfo info) {
-        UiUtils.OnPlaylistSelectedListener action = new UiUtils.OnPlaylistSelectedListener() {
+        UiUtils.OnPlaylistSelected action = new UiUtils.OnPlaylistSelected() {
             @Override
             public void
             onPlaylist(final long plid, final Object user) {

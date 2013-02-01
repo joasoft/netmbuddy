@@ -600,8 +600,13 @@ public class Utils {
     //
     // ------------------------------------------------------------------------
     public static boolean
-    isIcsOrLater() {
-        return android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
+    isAndroidApiLowerHC() {
+        return android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB;
+    }
+
+    public static boolean
+    isAndroidApiLowerICS() {
+        return android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
     }
 
     public static boolean
